@@ -1,16 +1,19 @@
-import * as cdk from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as cdk from 'aws-cdk-lib'
+import { Construct } from 'constructs'
+import { createAuth } from './cognito/auth'
+import { createAPI } from './api/appsync'
+import { createFunc } from './functions/construct'
 
 export class WithPeterStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
+	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+		super(scope, id, props)
 
-    // The code that defines your stack goes here
-
-    // example resource
-    // const queue = new sqs.Queue(this, 'WithPeterQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
-  }
+		const peterFunc = createFunc(this, {})
+		const auth = createAuth(this, {})
+		const api = createAPI(this, {
+			userpool: auth.userPool,
+			unauthenticatedRole: auth.identityPool.unauthenticatedRole,
+			lambdaFunction: peterFunc,
+		})
+	}
 }
